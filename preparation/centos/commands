@@ -1,0 +1,14 @@
+yum -y install git
+git clone https://github.com/6a16ec/bot_7483934.git
+yum -y remove git
+yum clean all
+
+cd ./bot_7483934/preparation/centos/
+
+cd ./python && sh ./install_python_stable.sh && cd ../
+cd ./db && sh ./install_mariadb_stable.sh && cd ../
+
+pip3 install -U -r ./python/requirements/requirements_aiogram_stable.txt
+pip3 install -U -r ./python/requirements/database_stable.txt
+
+cd ../../../
