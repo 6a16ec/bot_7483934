@@ -5,7 +5,7 @@ from db_module import db_config
 class Table:
     def __init__(self, name, logging=False):
         self.mariadb_connection = mariadb.connect(user=db_config.username, password=db_config.password,
-                                                  database=db_config.database_name)
+                                                  database=db_config.database_name, charset='utf8')
         self.cursor = self.mariadb_connection.cursor(buffered=True)
 
         self.table_name = name

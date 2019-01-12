@@ -3,8 +3,11 @@ password = "default_password_centos_000"
 database_name = "main"
 
 class tables:
-    catalog = "catalog"
+    categories = "categories"
+    items = "items"
     texts = "texts"
-    groups_statistic = "groups_statistic"
 
 # mysql -u root -p
+
+# SET character_set_server = 'utf8';
+# SET collation_server = 'utf8_unicode_ci';
