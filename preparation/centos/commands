@@ -10,5 +10,6 @@ cd ./db && sh ./install_mariadb_stable.sh && cd ../
 
 pip3 install -U -r ./python/requirements/requirements_aiogram_stable.txt
 pip3 install -U -r ./python/requirements/database_stable.txt
+pip3 install -U -r ./python/requirements/qiwi_stable.txt
 
 cd ../../../

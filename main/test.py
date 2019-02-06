@@ -1,37 +1,29 @@
+import asyncio
+import logging
+import config
 
-test = (1, 2, 3, 4)
-print(test)
-print(test[0])
-
-abc = []
-abc.append(None)
-abc.append(None)
-abc.append(None)
-print(abc)
-
-print(str(True))
-
-for i, element in enumerate(abc):
-    print(i, element)
-
-print(type(abc) is dict)
-
-a = {}
-a[9] = 7
-a[2] = 8
-a[6] = 4
-print(a.get(66))
+from aiogram import Bot, Dispatcher, types
+from aiogram.utils import executor, markdown
 
 
-a = ["1", "2", "3"]
-b = ["a", "b", "c"]
+API_TOKEN = config.telegram_token
 
-for i in zip(a, " ", b):
-    print(i)
+logging.basicConfig(level=logging.INFO)
 
-print("njdf {abc} kdf".format(abc = 1))
+loop = asyncio.get_event_loop()
+bot = Bot(token=API_TOKEN, loop=loop, parse_mode=types.ParseMode.MARKDOWN)
+dp = Dispatcher(bot)
 
-array = {}
-array[0] = 1
-array["3"] = "4"
-print(list(array.keys()))
+
+@dp.message_handler()
+async def check_language(message: types.Message):
+    name = "test"
+    text = markdown.text(
+        markdown.bold("{name}".format(name=name)),
+        markdown.text(' 🔸', markdown.bold('Code:'), markdown.italic("RUS")),
+        sep='\n')
+    await message.reply(text)
+
+
+if __name__ == '__main__':
+    executor.start_polling(dp, loop=loop, skip_updates=True)

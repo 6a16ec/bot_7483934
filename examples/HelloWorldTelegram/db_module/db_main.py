@@ -1,20 +1,17 @@
 # coding=utf-8
 import mysql.connector as mariadb
-try:
-    from db_module import db_config
-except:
-    import db_config
+from db_module import db_config
 
 class Table:
 
     def __init__(self, name, logging=False):
         self.mariadb_connection = mariadb.connect(user=db_config.username, password=db_config.password,
-                                                  database=db_config.database_name) # , charset='utf8'
+                                                  database=db_config.database_name, charset='utf8')
         self.cursor = self.mariadb_connection.cursor(buffered=True)
 
         self.table_name = name
         self.logging = logging
-        # self.send_query("SET collation_connection = 'utf8_general_ci';")
+        self.send_query("SET NAMES utf8;")
 
     def brackets(self, string):
         string = """ """ + """`""" + string + """`"""
@@ -41,10 +38,7 @@ class Table:
             fields_with_types=", ".join(fields_with_types)
         )
 
-        # print (query)
-
         self.send_query(query)
-
 
     def insert(self, fields, values):
 
@@ -181,3 +175,47 @@ class Table:
     def close(self):
         self.cursor.close()
         self.mariadb_connection.close()
+
+
+def example():
+    test = Table("test", True)
+    test.create(["id", "id_vk", "name", "message"],
+                ["int(5) PRIMARY KEY AUTO_INCREMENT", "INT(15)", "VARCHAR(100)", "VARCHAR(4096)"])
+
+    test.insert("id_vk", 12345)
+    test.insert(["id_vk", "name", "message"], [777777, "Nikita", "Hi, how are you"])
+    print(test.select("*", "id", 1))
+    print(test.select("*", "id", 2))
+
+    test.update("id", "1", "name", "Nikita")
+    test.insert(["id_vk", "name"], [123234, "Nikita"])
+    print(test.select("*", "name", "Nikita"))
+
+    test.delete("id", 1)
+    print(test.select("*", "name", "Nikita"))
+
+
+    print(test.select_all("id"))
+
+    test.insert("name", None)
+
+    print("Max ID: ", test.select_by_max(["id", "id_vk", "name"], "id"))
+
+    # test.delete_table("yes")
+
+    test.close()
+
+
+# if (__name__ == "__main__"): example()
+if (__name__ == "__main__"):
+
+    import db_config
+    texts = Table(db_config.tables.texts)
+    # texts.insert(["title", "text"], ["test2", "вот так вот"])
+    select = texts.select_all()
+    print (select)
+    for line in select:
+        for field in line:
+            print(field, type(field), field.encode("utf-8"))
+
+    texts.close()

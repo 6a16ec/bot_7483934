@@ -3,7 +3,8 @@ import asyncio
 from aiogram import types, Bot, Dispatcher
 from aiogram.utils import executor
 import config, keyboard
-from aiogram.types ChatActions
+
+from db_module import db_main, db_config
 
 bot = Bot(token=config.telegram_token)
 dp = Dispatcher(bot)
@@ -12,7 +13,9 @@ dp = Dispatcher(bot)
 @dp.message_handler(commands=['start', 'help'])
 async def cats(message: types.Message):
     print("ok")
-    await bot.send_message(message.chat.id, "Добро пожаловать!!", reply_markup=keyboard.reply([["Object #00001"], ["Object #00002"], ["HIDE KEYBOARD"]]))
+    texts = db_main.Table(db_config.tables.texts)
+    text = texts.insert("text", "title", "hello")
+    await bot.send_message(message.chat.id, text, reply_markup=keyboard.reply([["Object #00001"], ["Object #00002"], ["HIDE KEYBOARD"]]))
 
 
 @dp.message_handler(func=lambda message: message.text == "Object #00001")
@@ -31,10 +34,12 @@ async def command_text_hi(message):
 @dp.message_handler(commands=['file'])
 async def process_file_command(message: types.Message):
     user_id = message.from_user.id
-    await bot.send_chat_action(user_id, ChatActions.UPLOAD_DOCUMENT)
     await asyncio.sleep(1)  # скачиваем файл и отправляем его пользователю
     await bot.send_document(user_id, "text",
                             caption='Этот файл специально для тебя!')
+    with open('data/cats.jpg', 'rb') as photo:
+        await bot.send_photo(message.chat.id, photo, caption='Cats is here',
+                             reply_to_message_id=message.message_id)
 
 @dp.message_handler()
 async def echo(message: types.Message):
@@ -43,5 +48,7 @@ async def echo(message: types.Message):
 @dp.callback_query_handler(lambda callback_query: True)
 async def some_callback_handler(callback: types.CallbackQuery):
     await bot.send_message(callback.from_user.id, "CALLBACK: " + callback.data)
+
+
 
 executor.start_polling(dp, skip_updates=True)

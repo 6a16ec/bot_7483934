@@ -1,15 +1,15 @@
 # coding=utf-8
 import mysql.connector as mariadb
-try:
-    from db_module import db_config
-except:
-    import db_config
+
+from config import username, password, database_name
+import database_config
+tables = database_config.tables().names_dict
+
 
 class Table:
 
     def __init__(self, name, logging=False):
-        self.mariadb_connection = mariadb.connect(user=db_config.username, password=db_config.password,
-                                                  database=db_config.database_name) # , charset='utf8'
+        self.mariadb_connection = mariadb.connect(user=username, password=password, database=database_name)
         self.cursor = self.mariadb_connection.cursor(buffered=True)
 
         self.table_name = name
@@ -90,7 +90,36 @@ class Table:
             object[i] = list(tuple)
         return object
 
-    def select(self, fields, key_fields, key_values):
+    def exist(self, key_fields, key_values):
+
+        # SELECT EXISTS(SELECT id FROM table WHERE id = 1)
+
+        key_fields, key_values = self.toArray(key_fields, key_values)
+
+        keys = ["{field} = '{value}'".format(
+            field=field,
+            value=key_values[i]
+        ) for i, field in enumerate(key_fields)]
+
+        query = "SELECT EXISTS(SELECT {field} FROM {table_name} WHERE {keys})".format(
+            field=key_fields[0],
+            table_name=self.brackets(self.table_name),
+            keys=" and ".join(keys)
+        )
+        return self.send_query(query, True)[0][0]
+
+    def to_dict(self, fields, objects_data):
+        oblects = []
+
+        for object_data in objects_data:
+            oblect = {}
+            for i, field in enumerate(fields):
+                oblect[field] = object_data[i]
+            oblects.append(oblect)
+
+        return oblects
+
+    def select(self, fields, key_fields, key_values, to_dict = False):
 
         fields, key_fields, key_values = self.toArray(fields, key_fields, key_values)
 
@@ -104,7 +133,11 @@ class Table:
             table_name=self.brackets(self.table_name),
             keys=" and ".join(keys)
         )
-        return self.turple_to_array(self.send_query(query, True))
+        data = self.send_query(query, True)
+        if to_dict:
+            return self.to_dict(fields, data)
+        else:
+            return self.turple_to_array(data)
 
     def select_many_key(self, fields, key_field, key_values):
 
@@ -133,7 +166,7 @@ class Table:
         )
         return self.turple_to_array(self.send_query(query, True))
 
-    def select_all(self, fields="*"):
+    def select_all(self, fields="*", to_dict = False):
 
         fields = self.toArray(fields)
 
@@ -141,7 +174,11 @@ class Table:
             fields=", ".join(fields),
             table_name=self.brackets(self.table_name)
         )
-        return self.turple_to_array(self.send_query(query, True))
+        data = self.send_query(query, True)
+        if to_dict:
+            return self.to_dict(fields, data)
+        else:
+            return self.turple_to_array(data)
 
     def delete(self, key_fields, key_values):
 

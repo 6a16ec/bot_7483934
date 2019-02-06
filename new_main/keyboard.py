@@ -25,7 +25,7 @@ def to2Array(object, toString = False):
                     array[i][j] = str(object)
 
                 if type(array[i][j]) != type("string"):
-                    print(object, type(object))
+                    # print(object, type(object))
                     array = [[]]
                     break
 
@@ -62,7 +62,7 @@ def inline(array, callback = None):
     else:
         callback = array
 
-    print(array, callback)
+    # print(array, callback)
 
     max_len = len(max(array, key=len))
     keyboard = types.InlineKeyboardMarkup(row_width = max_len)
@@ -71,7 +71,14 @@ def inline(array, callback = None):
         for j, text in enumerate(line):
             button = types.InlineKeyboardButton(text = text, callback_data = callback[i][j])
             buttons.append(button)
-        print("new line")
+        # print("new line")
         keyboard.add(*buttons)
 
     return keyboard
+
+def test():
+    k = []
+    for ind, (code, extension, resolution) in enumerate(self.formats):
+        k.append([InlineKeyboardButton("{0}, {1}".format(extension, resolution),
+                                       callback_data="{} {}".format(code, self.link))])
+    kb = InlineKeyboardMarkup().add(k)
